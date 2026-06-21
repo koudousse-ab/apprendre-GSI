@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Révision SI — Systèmes d'Information</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1d2435;
+    --bg4: #232b3e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #9ba3b8;
+    --text3: #636b82;
+    --accent: #4f7bff;
+    --accent2: #3a5fd4;
+    --green: #22c55e;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --purple: #a855f7;
+    --teal: #14b8a6;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Courier New', monospace;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ===== LAYOUT ===== */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 0;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 8px;
+  }
+
+  .sidebar-logo h1 { font-size: 14px; font-weight: 600; color: var(--text); }
+  .sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .sidebar-section { padding: 12px 12px 4px; }
+  .sidebar-section-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; padding: 0 8px 6px; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; color: var(--text2);
+    transition: all .15s;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(79,123,255,0.15); color: var(--accent); font-weight: 500; }
+  .nav-item .icon { width: 18px; text-align: center; font-size: 14px; flex-shrink: 0; }
+  .nav-item .badge {
+    margin-left: auto; font-size: 10px; font-weight: 600;
+    background: var(--bg4); color: var(--text3);
+    padding: 2px 6px; border-radius: 20px;
+  }
+  .nav-item.done .badge { background: rgba(34,197,94,0.15); color: var(--green); }
+
+  .progress-bar-wrap { padding: 16px 20px 20px; margin-top: auto; border-top: 1px solid var(--border); }
+  .progress-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 4px; background: var(--bg4); border-radius: 2px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
+
+  /* ===== MAIN ===== */
+  .main { margin-left: 260px; flex: 1; }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 50;
+  }
+
+  .topbar h2 { font-size: 15px; font-weight: 600; }
+  .topbar .breadcrumb { font-size: 12px; color: var(--text3); margin-left: auto; }
+
+  .content { padding: 32px; max-width: 820px; }
+
+  /* ===== PAGES ===== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, rgba(79,123,255,.12) 0%, rgba(168,85,247,.08) 100%);
+    border: 1px solid rgba(79,123,255,.2);
+    border-radius: var(--radius-lg);
+    padding: 32px; margin-bottom: 28px;
+  }
+  .hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .hero p { color: var(--text2); font-size: 14px; line-height: 1.7; }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip {
+    font-size: 11px; font-weight: 500;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--border2); color: var(--text2);
+  }
+  .chip.accent { background: rgba(79,123,255,.15); color: var(--accent); border-color: rgba(79,123,255,.3); }
+  .chip.green { background: rgba(34,197,94,.12); color: var(--green); border-color: rgba(34,197,94,.25); }
+  .chip.purple { background: rgba(168,85,247,.12); color: var(--purple); border-color: rgba(168,85,247,.25); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    text-align: center;
+  }
+  .stat-card .val { font-size: 22px; font-weight: 700; }
+  .stat-card .lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .stat-card.accent .val { color: var(--accent); }
+  .stat-card.green .val { color: var(--green); }
+  .stat-card.orange .val { color: var(--orange); }
+  .stat-card.purple .val { color: var(--purple); }
+
+  /* ===== LESSON SECTIONS ===== */
+  .lesson-block { margin-bottom: 24px; }
+
+  .section-header {
+    font-size: 12px; font-weight: 600; letter-spacing: .06em;
+    color: var(--text3); text-transform: uppercase;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .def-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius); padding: 16px 18px;
+    font-size: 13.5px; line-height: 1.7; margin-bottom: 16px;
+  }
+  .def-box strong { color: var(--accent); }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    font-size: 13px;
+  }
+  .card .card-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .card h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .card p { color: var(--text2); font-size: 12px; line-height: 1.55; }
+  .card.op .card-label { color: var(--green); }
+  .card.dec .card-label { color: var(--accent); }
+  .card.str .card-label { color: var(--orange); }
+  .card.sec .card-label { color: var(--red); }
+  .card.col .card-label { color: var(--purple); }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: var(--bg3); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; color: var(--text2); letter-spacing: .04em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+
+  .dikw-pyramid {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 16px;
+  }
+  .dikw-level {
+    border-radius: 8px; padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+  }
+  .dikw-level .num { font-size: 11px; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dikw-level h4 { font-size: 13px; font-weight: 600; }
+  .dikw-level p { font-size: 12px; color: var(--text2); }
+  .dikw-level.d4 { background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.2); }
+  .dikw-level.d3 { background: rgba(79,123,255,.1); border: 1px solid rgba(79,123,255,.2); }
+  .dikw-level.d2 { background: rgba(20,184,166,.08); border: 1px solid rgba(20,184,166,.2); }
+  .dikw-level.d1 { background: var(--bg2); border: 1px solid var(--border); }
+  .dikw-level.d4 .num { background: rgba(168,85,247,.2); color: var(--purple); }
+  .dikw-level.d3 .num { background: rgba(79,123,255,.2); color: var(--accent); }
+  .dikw-level.d2 .num { background: rgba(20,184,166,.15); color: var(--teal); }
+  .dikw-level.d1 .num { background: var(--bg4); color: var(--text2); }
+
+  .tip {
+    background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2);
+    border-radius: var(--radius); padding: 12px 16px;
+    font-size: 13px; color: var(--text2); margin: 12px 0;
+    display: flex; gap: 10px;
+  }
+  .tip .tip-icon { color: var(--orange); flex-shrink: 0; }
+
+  .info-box {
+    background: rgba(79,123,255,.07); border: 1px solid rgba(79,123,255,.18);
+    border-radius: var(--radius); padding: 13px 16px;
+    font-size: 13px; color: var(--text2); margin: 12px 0;
+  }
+  .info-box strong { color: var(--accent); }
+
+  .steps-list { list-style: none; margin-bottom: 16px; }
+  .steps-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(79,123,255,.15); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-body h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .step-body p { font-size: 12px; color: var(--text2); }
+
+  .accordion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .accordion summary {
+    padding: 12px 16px; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    background: var(--bg2);
+    display: flex; align-items: center; gap: 8px;
+    list-style: none; user-select: none;
+  }
+  .accordion summary::after { content: '›'; margin-left: auto; color: var(--text3); transition: transform .2s; }
+  .accordion[open] summary::after { transform: rotate(90deg); }
+  .accordion summary:hover { background: var(--bg3); }
+  .accordion-body { padding: 14px 16px; font-size: 13px; color: var(--text2); line-height: 1.65; border-top: 1px solid var(--border); background: var(--bg); }
+  .accordion-body ul { padding-left: 16px; margin-top: 6px; }
+  .accordion-body li { margin-bottom: 4px; }
+  .accordion-body strong { color: var(--text); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 12px; text-align: center;
+  }
+  .kpi .kpi-val { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .kpi .kpi-lbl { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  /* ===== EXERCISES ===== */
+  .exercise {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    margin-bottom: 16px;
+  }
+  .exercise-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .ex-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .ex-num.mc { background: rgba(79,123,255,.2); color: var(--accent); }
+  .ex-num.tf { background: rgba(20,184,166,.15); color: var(--teal); }
+  .ex-num.match { background: rgba(168,85,247,.15); color: var(--purple); }
+  .ex-num.fill { background: rgba(245,158,11,.12); color: var(--orange); }
+  .ex-type { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+  .ex-question { font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 14px; }
+  .ex-question span.hl { color: var(--accent); }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    padding: 10px 14px; border-radius: 8px;
+    border: 1px solid var(--border2); cursor: pointer;
+    font-size: 13px; transition: all .15s;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3); color: var(--text);
+  }
+  .option:hover { border-color: var(--accent); background: rgba(79,123,255,.08); }
+  .option.selected { border-color: var(--accent); background: rgba(79,123,255,.12); }
+  .option.correct { border-color: var(--green); background: rgba(34,197,94,.1); color: var(--green); }
+  .option.wrong { border-color: var(--red); background: rgba(239,68,68,.1); color: var(--red); }
+  .option .opt-letter {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: var(--bg4); font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--text2);
+  }
+  .option.correct .opt-letter { background: rgba(34,197,94,.2); color: var(--green); }
+  .option.wrong .opt-letter { background: rgba(239,68,68,.2); color: var(--red); }
+
+  .feedback {
+    margin-top: 12px; padding: 12px 14px;
+    border-radius: 8px; font-size: 13px;
+    display: none;
+  }
+  .feedback.show { display: flex; gap: 8px; align-items: flex-start; }
+  .feedback.ok { background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); color: var(--green); }
+  .feedback.ko { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); color: #f87171; }
+
+  .btn {
+    padding: 9px 18px; border-radius: 8px; border: none;
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: all .15s; font-family: var(--font);
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+  .btn-secondary:hover { background: var(--bg4); color: var(--text); }
+  .btn-green { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.25); }
+  .btn-green:hover { background: rgba(34,197,94,.25); }
+
+  /* True/False */
+  .tf-options { display: flex; gap: 10px; }
+  .tf-btn {
+    flex: 1; padding: 11px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600; border: 1px solid var(--border2);
+    background: var(--bg3); color: var(--text2); transition: all .15s;
+    font-family: var(--font);
+  }
+  .tf-btn:hover { border-color: var(--accent); background: rgba(79,123,255,.08); color: var(--text); }
+  .tf-btn.correct { border-color: var(--green); background: rgba(34,197,94,.12); color: var(--green); }
+  .tf-btn.wrong { border-color: var(--red); background: rgba(239,68,68,.1); color: var(--red); }
+
+  /* Fill blank */
+  .fill-input {
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--text);
+    font-family: var(--font); width: 100%; outline: none;
+    transition: border .15s; margin-bottom: 10px;
+  }
+  .fill-input:focus { border-color: var(--accent); }
+  .fill-input.correct { border-color: var(--green); background: rgba(34,197,94,.07); }
+  .fill-input.wrong { border-color: var(--red); background: rgba(239,68,68,.07); }
+
+  /* Matching */
+  .match-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .match-col h4 { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+  .match-item {
+    padding: 9px 12px; border-radius: 7px;
+    border: 1px solid var(--border2); font-size: 12.5px;
+    cursor: pointer; transition: all .15s; background: var(--bg3);
+    margin-bottom: 6px; min-height: 36px; display: flex; align-items: center;
+  }
+  .match-item.selected { border-color: var(--accent); background: rgba(79,123,255,.12); color: var(--accent); }
+  .match-item.matched { border-color: var(--green); background: rgba(34,197,94,.08); color: var(--green); cursor: default; }
+  .match-item.wrong-match { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
+
+  /* ===== MICRO EXAM ===== */
+  .exam-header {
+    background: linear-gradient(135deg, rgba(168,85,247,.12) 0%, rgba(79,123,255,.08) 100%);
+    border: 1px solid rgba(168,85,247,.2);
+    border-radius: var(--radius-lg); padding: 24px;
+    margin-bottom: 24px; text-align: center;
+  }
+  .exam-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .exam-header p { color: var(--text2); font-size: 13px; }
+
+  .exam-timer {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 13px; font-weight: 600; margin-top: 12px;
+  }
+  .exam-timer .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .exam-progress-bar-wrap { margin-bottom: 20px; }
+  .exam-progress-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .exam-bar { height: 5px; background: var(--bg3); border-radius: 3px; }
+  .exam-bar-fill { height: 100%; background: var(--purple); border-radius: 3px; transition: width .3s; }
+
+  .exam-q { display: none; }
+  .exam-q.active { display: block; }
+  .exam-q-num { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .exam-q-text { font-size: 15px; font-weight: 500; line-height: 1.5; margin-bottom: 16px; }
+
+  .exam-nav { display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+
+  /* Results */
+  .result-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px; text-align: center;
+    margin-bottom: 20px;
+  }
+  .score-circle {
+    width: 100px; height: 100px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; margin: 0 auto 16px;
+    font-size: 28px; font-weight: 800;
+    border: 4px solid;
+  }
+  .score-circle.excellent { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.1); }
+  .score-circle.good { border-color: var(--accent); color: var(--accent); background: rgba(79,123,255,.1); }
+  .score-circle.average { border-color: var(--orange); color: var(--orange); background: rgba(245,158,11,.1); }
+  .score-circle.poor { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.1); }
+  .score-label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+
+  .result-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .rb-item { background: var(--bg3); border-radius: 8px; padding: 10px; text-align: center; }
+  .rb-val { font-size: 18px; font-weight: 700; }
+  .rb-lbl { font-size: 11px; color: var(--text3); }
+  .rb-item.c { color: var(--green); }
+  .rb-item.w { color: var(--red); }
+  .rb-item.s { color: var(--orange); }
+
+  .answer-review { margin-top: 20px; }
+  .ar-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .ar-item.ok { background: rgba(34,197,94,.07); border: 1px solid rgba(34,197,94,.15); }
+  .ar-item.ko { background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.15); }
+  .ar-icon { flex-shrink: 0; font-size: 14px; }
+  .ar-text { flex: 1; }
+  .ar-text strong { display: block; margin-bottom: 2px; }
+  .ar-text .ar-correct { color: var(--green); font-size: 12px; }
+  .ar-text .ar-given { color: var(--red); font-size: 12px; }
+
+  /* ===== SEPARATOR ===== */
+  .separator { height: 1px; background: var(--border); margin: 24px 0; }
+
+  .page-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .main { margin-left: 0; }
+    .app { flex-direction: column; }
+    .stats-row, .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .result-breakdown { grid-template-columns: repeat(3, 1fr); }
+    .match-container { grid-template-columns: 1fr; }
+  }
+
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+  .tag.op { background: rgba(34,197,94,.12); color: var(--green); }
+  .tag.dec { background: rgba(79,123,255,.12); color: var(--accent); }
+  .tag.str { background: rgba(245,158,11,.12); color: var(--orange); }
+  .tag.itil { background: rgba(168,85,247,.12); color: var(--purple); }
+
+  .principle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .principle-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+  }
+  .principle-card .p-num { font-size: 11px; color: var(--purple); font-weight: 700; margin-bottom: 4px; }
+  .principle-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .principle-card p { font-size: 11.5px; color: var(--text2); }
+
+  .chain-steps {
+    display: flex; gap: 0; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .chain-step {
+    flex: 1; min-width: 90px;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 10px 8px; text-align: center;
+    position: relative; font-size: 12px;
+  }
+  .chain-step:not(:last-child)::after {
+    content: '›'; position: absolute;
+    right: -10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 16px; z-index: 1;
+  }
+  .chain-step:first-child { border-radius: 8px 0 0 8px; }
+  .chain-step:last-child { border-radius: 0 8px 8px 0; }
+  .chain-step .c-num { font-size: 10px; font-weight: 700; color: var(--purple); margin-bottom: 3px; }
+  .chain-step .c-name { font-weight: 600; font-size: 12px; }
+  .chain-step .c-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .section-nav {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .section-nav button {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border2); background: var(--bg2); color: var(--text2);
+    cursor: pointer; font-family: var(--font); transition: all .15s;
+  }
+  .section-nav button.active, .section-nav button:hover {
+    background: rgba(79,123,255,.15); color: var(--accent); border-color: rgba(79,123,255,.3);
+  }
+
+  .exam-select {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 24px;
+  }
+  .exam-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    cursor: pointer; transition: all .2s;
+  }
+  .exam-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .exam-card .ec-icon { font-size: 28px; margin-bottom: 10px; }
+  .exam-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .exam-card p { font-size: 12px; color: var(--text3); }
+  .exam-card .ec-meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">📡</div>
+    <h1>Systèmes d'Information</h1>
+    <p>Révision complète + exercices</p>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Cours</div>
+    <button class="nav-item active" onclick="showPage('home')">
+      <span class="icon">🏠</span> Accueil
+    </button>
+    <button class="nav-item" onclick="showPage('ch1')">
+      <span class="icon">📘</span> Ch.1 — Introduction aux SI
+    </button>
+    <button class="nav-item" onclick="showPage('ch2')">
+      <span class="icon">📊</span> Ch.2 — Types & Rôles
+    </button>
+    <button class="nav-item" onclick="showPage('ch3')">
+      <span class="icon">⚙️</span> Ch.3 — Gestion des SI
+    </button>
+    <button class="nav-item" onclick="showPage('ch4')">
+      <span class="icon">🔷</span> Ch.4 — ITIL 4
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Entraînement</div>
+    <button class="nav-item" onclick="showPage('ex1')">
+      <span class="icon">✏️</span> Exercices Ch.1
+      <span class="badge" id="badge-ex1">5</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ex2')">
+      <span class="icon">✏️</span> Exercices Ch.2
+      <span class="badge" id="badge-ex2">5</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ex3')">
+      <span class="icon">✏️</span> Exercices Ch.3
+      <span class="badge" id="badge-ex3">5</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ex4')">
+      <span class="icon">✏️</span> Exercices Ch.4
+      <span class="badge" id="badge-ex4">5</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Examens</div>
+    <button class="nav-item" onclick="showPage('exams')">
+      <span class="icon">🎓</span> Micro-examens
+    </button>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>Progression globale</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="topbar">
+    <span style="font-size:18px">📡</span>
+    <h2 id="page-title">Accueil</h2>
+    <span class="breadcrumb" id="page-breadcrumb">Systèmes d'Information · Université de Kara</span>
+  </div>
+
+  <div class="content">
+
+    <!-- ============================== HOME ============================== -->
+    <div id="page-home" class="page active">
+      <div class="hero">
+        <h2>Prêt pour l'examen ? 💪</h2>
+        <p>Tout le contenu de tes 4 chapitres est ici — cours détaillés, exercices variés et micro-examens chronométrés. Commence par réviser, puis teste-toi.</p>
+        <div class="hero-chips">
+          <span class="chip accent">4 chapitres</span>
+          <span class="chip accent">20 exercices</span>
+          <span class="chip green">4 micro-examens</span>
+          <span class="chip purple">1 examen final</span>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card accent"><div class="val">4</div><div class="lbl">Chapitres</div></div>
+        <div class="stat-card green"><div class="val">20</div><div class="lbl">Exercices</div></div>
+        <div class="stat-card orange"><div class="val">60</div><div class="lbl">Questions exam</div></div>
+        <div class="stat-card purple"><div class="val">5</div><div class="lbl">Examens</div></div>
+      </div>
+
+      <div class="section-header">Plan d'étude recommandé</div>
+      <ul class="steps-list">
+        <li><div class="step-num">1</div><div class="step-body"><h4>Révise Ch.1 — Introduction aux SI</h4><p>Définition, composantes, pyramide DIKW, 4 fonctions</p></div></li>
+        <li><div class="step-num">2</div><div class="step-body"><h4>Fais les exercices Ch.1</h4><p>5 questions pour valider ta compréhension</p></div></li>
+        <li><div class="step-num">3</div><div class="step-body"><h4>Révise Ch.2 — Types & Rôles</h4><p>Opérationnel, décisionnel, stratégique + les 5 rôles</p></div></li>
+        <li><div class="step-num">4</div><div class="step-body"><h4>Révise Ch.3 — Gestion des SI</h4><p>5 dimensions, défis, KPIs, cycle de gestion</p></div></li>
+        <li><div class="step-num">5</div><div class="step-body"><h4>Révise Ch.4 — ITIL 4</h4><p>SVS, 7 principes, chaîne de valeur, 34 pratiques, 4 dimensions</p></div></li>
+        <li><div class="step-num">6</div><div class="step-body"><h4>Passe les micro-examens</h4><p>1 examen par chapitre + 1 examen final de synthèse</p></div></li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">⚡</span>
+        <span><strong>Conseil du prof :</strong> Les <strong>7 principes ITIL</strong> et la <strong>pyramide DIKW</strong> sont très souvent aux examens. Mémorise-les en premier.</span>
+      </div>
+    </div>
+
+    <!-- ============================== CH1 ============================== -->
+    <div id="page-ch1" class="page">
+      <div class="page-title">Introduction aux Systèmes d'Information</div>
+      <div class="page-sub">Chapitre 1 — Définition, composantes, fonctions</div>
+
+      <div class="def-box">
+        Un <strong>SI (Système d'Information)</strong> est un ensemble organisé de <strong>ressources humaines, technologiques et organisationnelles</strong> qui collectent, traitent, stockent et diffusent des informations pour répondre aux besoins d'une organisation. Les SI soutiennent les activités opérationnelles, tactiques et stratégiques.
+      </div>
+
+      <div class="section-header">Les 5 composantes d'un SI</div>
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" style="color:var(--accent)">1. Matériel (Hardware)</div><h4>Infrastructure physique</h4><p>Serveurs, postes, tablettes, smartphones, stockage (HDD, SSD, NAS), réseaux (routeurs, Wi-Fi, fibre, BLR), IoT (capteurs). <em>Data Center</em> = infrastructure centralisée.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--teal)">2. Logiciels</div><h4>OS + Applications</h4><p>OS : Windows, Linux, macOS. Applis : SYDONIA, ETAXE, SAP, Oracle, Salesforce. Données : MySQL, Power BI. Sécurité : antivirus, pare-feu.<br><em>ERP/PGI</em> = gère tous les processus.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--orange)">3. Données</div><h4>Structurées & non structurées</h4><p>Structurées (SQL), non structurées (emails, vidéos), temps réel (IoT).<br><strong>Big Data :</strong> Volume + Vélocité + Variété → traitements parallélisés.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">4. Processus</div><h4>Flux de travail</h4><p>Traitement des commandes, facturation, tableaux de bord décisionnels, planification stratégique.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--green)">5. Utilisateurs</div><h4>3 profils</h4><p>Utilisateurs finaux (employés, clients), experts SI (admins, devs), décideurs (managers, dirigeants).</p></div>
+      </div>
+
+      <div class="section-header">La pyramide DIKW (à connaître par cœur)</div>
+      <div class="dikw-pyramid">
+        <div class="dikw-level d4"><div class="num">4</div><div><h4>Sagesse (Wisdom)</h4><p>Compréhension profonde + jugement stratégique → décisions long terme</p></div></div>
+        <div class="dikw-level d3"><div class="num">3</div><div><h4>Connaissance (Knowledge)</h4><p>Information + expérience pour agir → "La hausse vient d'une campagne ciblée, il faut la prolonger"</p></div></div>
+        <div class="dikw-level d2"><div class="num">2</div><div><h4>Information</h4><p>Donnée contextualisée → "CA de 3M F ce mois, +10% vs mois précédent"</p></div></div>
+        <div class="dikw-level d1"><div class="num">1</div><div><h4>Données (Data)</h4><p>Fait brut, sans signification → "250", "3 000 000", "bleu"</p></div></div>
+      </div>
+
+      <div class="section-header">Les 4 fonctions du SI (cycle continu)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fonction</th><th>Objectif</th><th>Technologies clés</th><th>Exemple OTR/Togo</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Collecte</strong></td><td>Rassembler des données brutes</td><td>IoT, APIs, formulaires, CRM, ERP</td><td>API CFE, DGDN, fiches contribuables</td></tr>
+            <tr><td><strong>Stockage</strong></td><td>Conserver de façon sécurisée</td><td>SQL/NoSQL, Cloud (AWS, GCloud), Data Lakes</td><td>Dossiers contribuables OTR</td></tr>
+            <tr><td><strong>Traitement</strong></td><td>Transformer en infos exploitables</td><td>BI, Big Data, IA, ML (Power BI, Tableau)</td><td>Analyse des déclarations fiscales</td></tr>
+            <tr><td><strong>Diffusion</strong></td><td>Partager avec les parties prenantes</td><td>Tableaux de bord, notifications, APIs, portails</td><td>KPI en temps réel OTR</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box"><strong>Exemple intégré — Chaîne logistique :</strong> Capteurs IoT surveillent les stocks (matériel) → ERP gère commandes et livraisons (logiciel) → Historique des ventes (données) → Automatisation des commandes quand le seuil minimum est atteint (processus) → Responsable logistique pilote le tout (utilisateur).</div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="showPage('ex1')">✏️ Faire les exercices Ch.1</button>
+        <button class="btn btn-secondary" onclick="showPage('ch2')">Ch.2 suivant →</button>
+      </div>
+    </div>
+
+    <!-- ============================== CH2 ============================== -->
+    <div id="page-ch2" class="page">
+      <div class="page-title">Types et Rôles des SI</div>
+      <div class="page-sub">Chapitre 2 — Opérationnel, Décisionnel, Stratégique + 5 Rôles</div>
+
+      <div class="section-header">Les 3 types de SI</div>
+      <div class="cards-grid">
+        <div class="card op"><div class="card-label">Opérationnel</div><h4>Activités courantes</h4><p><strong>Caractéristiques :</strong> Automatisation, traitement temps réel, fiabilité, précision.<br><strong>Outils :</strong> ERP (SAP, Oracle), CRM, SYDONIA, POS.<br><strong>Utilisateurs :</strong> Employés, responsables opérationnels.<br><strong>Exemple :</strong> Grande surface — caisse enregistre, stock mis à jour, commande fournisseur auto.</p></div>
+        <div class="card dec"><div class="card-label">Décisionnel</div><h4>Aide à la décision</h4><p><strong>Caractéristiques :</strong> Analyses, prévisions, tableaux de bord interactifs.<br><strong>Outils :</strong> Tableau, Power BI, QlikView, Hadoop, Spark.<br><strong>Utilisateurs :</strong> Managers, analystes.<br><strong>Exemple :</strong> Directeur régional identifie zones de vente faibles → ajuste distribution.</p></div>
+        <div class="card str"><div class="card-label">Stratégique</div><h4>Long terme & avantage</h4><p><strong>Caractéristiques :</strong> IA, ML, Big Data. Alignés sur objectifs globaux.<br><strong>Outils :</strong> Salesforce Einstein, Dynamics 365, SPSS, SAS.<br><strong>Utilisateurs :</strong> Dirigeants.<br><strong>Exemple :</strong> Transport — analyse flux logistiques, anticipation goulots, optimisation routes.</p></div>
+      </div>
+
+      <div class="section-header">Tableau comparatif complet</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Critère</th><th>Opérationnel</th><th>Décisionnel</th><th>Stratégique</th></tr></thead>
+          <tbody>
+            <tr><td>Objectif principal</td><td>Tâches courantes & transactionnelles</td><td>Décision moyen terme</td><td>Long terme + innovation</td></tr>
+            <tr><td>Horizon temporel</td><td>Temps réel / immédiat</td><td>Semaines / mois</td><td>Années</td></tr>
+            <tr><td>Utilisateurs clés</td><td>Employés, responsables opérationnels</td><td>Managers, analystes</td><td>Dirigeants, décideurs stratégiques</td></tr>
+            <tr><td>Type de données</td><td>Transactionnelles brutes</td><td>Agrégées, historiques</td><td>Prédictives, tendances</td></tr>
+            <tr><td>Exemples</td><td>POS, gestion stocks, CRM</td><td>BI, tableaux de bord KPI</td><td>Analyse tendances, plans transformation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-header">Les 5 rôles des SI dans les organisations</div>
+      <div class="cards-grid">
+        <div class="card op"><div class="card-label">Rôle Opérationnel</div><p>Automatisation, réduction erreurs, suivi temps réel, réduction coûts.<br><em>Exemples : gestion stocks, POS, suivi production.</em></p></div>
+        <div class="card dec"><div class="card-label">Rôle Décisionnel</div><p>Analyse des performances, prévisions, scénarios data-driven.<br><em>Exemples : BI (KPI), DSS, analyse prédictive ML.</em></p></div>
+        <div class="card str"><div class="card-label">Rôle Stratégique</div><p>Innovation, transformation numérique, adaptabilité. <strong>Innovation disruptive (OCDE)</strong> = rend un processus obsolète, crée nouvelle valeur.<br><em>Exemples : personnalisation Amazon, optimisation logistique.</em></p></div>
+        <div class="card col"><div class="card-label">Rôle Collaboratif</div><p>Communication, partage de connaissances.<br><em>Outils : SharePoint, Google Drive, Slack, Teams, Yammer.</em><br>Impact : efficacité, engagement, innovation.</p></div>
+        <div class="card sec"><div class="card-label">Rôle Sécuritaire</div><p>Protection données et actifs numériques.<br><em>Outils : pare-feu, antivirus, IAM, sauvegardes, RGPD.</em><br>Impact : réduction risques, confiance clients, continuité.</p></div>
+      </div>
+
+      <div class="info-box"><strong>Exemple intégré — Chaîne de magasins :</strong><br>
+      <span class="tag op">Opérationnel</span> POS enregistre les ventes + met à jour les stocks.<br>
+      <span class="tag dec">Décisionnel</span> Tableau de bord analyse les ventes par région → ajustement des promos.<br>
+      <span class="tag str">Stratégique</span> Analyse prédictive identifie nouvelles tendances + modèle omnicanal améliore l'expérience client.</div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="showPage('ex2')">✏️ Faire les exercices Ch.2</button>
+        <button class="btn btn-secondary" onclick="showPage('ch3')">Ch.3 suivant →</button>
+      </div>
+    </div>
+
+    <!-- ============================== CH3 ============================== -->
+    <div id="page-ch3" class="page">
+      <div class="page-title">Gestion des Systèmes d'Information</div>
+      <div class="page-sub">Chapitre 2 (cours) — Planification, exploitation, sécurité, gouvernance</div>
+
+      <div class="def-box">
+        La <strong>gestion des SI</strong> est un processus intégré couvrant l'ensemble des activités, processus et outils nécessaires pour <strong>planifier, développer, exploiter et sécuriser</strong> les SI — en alignant les technologies de l'information avec les objectifs organisationnels tout en garantissant une utilisation optimale des ressources.
+      </div>
+
+      <div class="section-header">Les 5 dimensions de la gestion des SI</div>
+
+      <details class="accordion">
+        <summary>🅐 Planification stratégique des SI</summary>
+        <div class="accordion-body">
+          <strong>Objectif :</strong> Définir comment les SI soutiennent les objectifs stratégiques à long terme.<ul>
+            <li>Analyse des besoins organisationnels</li>
+            <li>Évaluation des nouvelles technologies</li>
+            <li>Élaboration d'une feuille de route technologique</li>
+            <li><strong>Outils :</strong> COBIT, ITIL, matrices d'alignement Business-IT</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>🅑 Développement et maintenance des SI</summary>
+        <div class="accordion-body">
+          <strong>Cycle de vie d'un SI (5 étapes) :</strong><ul>
+            <li>1. Analyse des besoins</li>
+            <li>2. Conception du système</li>
+            <li>3. Développement ou acquisition</li>
+            <li>4. Tests et validation</li>
+            <li>5. Déploiement et maintenance</li>
+          </ul>
+          <br><strong>Méthodologies :</strong> Cascade (Waterfall), Cycle en V, Scrum, Kanban, SAFe.<br>
+          <strong>Outils de gestion de projet :</strong> Gantt, PERT, gestion des risques.
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>🅒 Exploitation des SI</summary>
+        <div class="accordion-body">
+          <strong>Objectif :</strong> Disponibilité, performance et sécurité en continu.<ul>
+            <li><strong>Gestion des opérations :</strong> Monitoring continu, support technique, maintenance préventive/corrective</li>
+            <li><strong>Gestion des incidents (ITSM) :</strong> ServiceNow, Jira Service Desk</li>
+            <li><strong>Outils de monitoring :</strong> Nagios, Zabbix (surveillance temps réel)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>🅓 Sécurité et gestion des risques</summary>
+        <div class="accordion-body">
+          <strong>Principes CIA (fondamentaux) :</strong><ul>
+            <li><strong>C</strong>onfidentialité — protection des données sensibles</li>
+            <li><strong>I</strong>ntégrité — préservation de l'exactitude des données</li>
+            <li><strong>A</strong>vailability (Disponibilité) — accessibilité continue des SI</li>
+          </ul>
+          <br><strong>Menaces :</strong> cyberattaques, phishing, malwares, ransomwares.<br>
+          <strong>Normes :</strong> ISO 27001, RGPD (réglementation européenne sur la protection des données).<br>
+          <strong>Outils :</strong> IAM (gestion des identités), pare-feu, antivirus, chiffrement.<br>
+          <strong>Plans :</strong> PCA (Plan de Continuité d'Activité), PRA (Plan de Reprise d'Activité).
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>🅔 Stratégie et gouvernance des SI</summary>
+        <div class="accordion-body">
+          <strong>Objectif :</strong> Aligner les SI avec les objectifs organisationnels et respecter les contraintes légales.<ul>
+            <li>Rôle du <strong>DSI</strong> (Directeur des Systèmes d'Information), comités de pilotage</li>
+            <li><strong>COBIT</strong> = Control Objectives for Information and Related Technologies → gestion des risques + alignement stratégique</li>
+            <li><strong>ITIL</strong> = Information Technology Infrastructure Library → meilleures pratiques pour la gestion des services IT</li>
+          </ul>
+          <br><strong>KPI de gouvernance :</strong> disponibilité systèmes, MTTR (Mean Time To Repair), taux satisfaction utilisateurs.
+        </div>
+      </details>
+
+      <div class="section-header">Les 4 défis majeurs</div>
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" style="color:var(--accent)">Adaptation aux innovations</div><p>IA, Big Data, cloud computing obligent à repenser constamment les SI.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--orange)">Gestion des coûts</div><p>Infrastructure performante + contraintes budgétaires dans un contexte de ressources limitées.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--red)">Cybersécurité</div><p>Cyberattaques de plus en plus sophistiquées → investissements accrus + sensibilisation permanente.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">Résistance au changement</div><p>Employés réticents à adopter de nouveaux outils → gestion du changement essentielle.</p></div>
+      </div>
+
+      <div class="section-header">KPIs de la gestion des SI</div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">≥ 99,9%</div><div class="kpi-lbl">Disponibilité systèmes</div></div>
+        <div class="kpi"><div class="kpi-val">≤ 4h</div><div class="kpi-lbl">MTTR (résolution incidents)</div></div>
+        <div class="kpi"><div class="kpi-val">≥ 80%</div><div class="kpi-lbl">Satisfaction utilisateurs</div></div>
+        <div class="kpi"><div class="kpi-val">≤ 5%</div><div class="kpi-lbl">Dépassement budgétaire</div></div>
+      </div>
+
+      <div class="section-header">Cycle de gestion efficace (4 étapes)</div>
+      <ul class="steps-list">
+        <li><div class="step-num">1</div><div class="step-body"><h4>Analyse des besoins</h4><p>Identifier les problèmes actuels (ex: gestion décentralisée des stocks)</p></div></li>
+        <li><div class="step-num">2</div><div class="step-body"><h4>Définition des objectifs</h4><p>Ex: réduire le temps moyen de traitement des commandes de 20% en 1 an</p></div></li>
+        <li><div class="step-num">3</div><div class="step-body"><h4>Mise en œuvre</h4><p>Ex: migration d'un système local vers un ERP cloud (SAP ou Oracle)</p></div></li>
+        <li><div class="step-num">4</div><div class="step-body"><h4>Suivi & amélioration</h4><p>Analyse des rapports de KPI → ajustement continu des ressources</p></div></li>
+      </ul>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="showPage('ex3')">✏️ Faire les exercices Ch.3</button>
+        <button class="btn btn-secondary" onclick="showPage('ch4')">Ch.4 suivant →</button>
+      </div>
+    </div>
+
+    <!-- ============================== CH4 ============================== -->
+    <div id="page-ch4" class="page">
+      <div class="page-title">Cadre de Management ITIL 4</div>
+      <div class="page-sub">Chapitre 3 — SVS, 7 principes, chaîne de valeur, 34 pratiques, 4 dimensions</div>
+
+      <div class="def-box">
+        <strong>ITIL 4</strong> (Information Technology Infrastructure Library) est un cadre de référence internationalement reconnu pour la gestion des services informatiques (<strong>ITSM</strong>). La version 4 propose une approche modernisée centrée sur la <strong>création de valeur</strong>, l'agilité et l'intégration des nouvelles technologies — cloud, DevOps, IA.
+      </div>
+
+      <div class="section-header">Le SVS — Système de Valeur des Services (5 composants)</div>
+      <div class="info-box"><strong>SVS :</strong> Représente comment les composants de l'organisation travaillent ensemble pour créer de la valeur. Il est <strong>flexible</strong> (pas de combinaison unique correcte). <br>Entrée = <strong>Demande</strong> (besoin) ou <strong>Opportunité</strong> (potentiel de valeur). Sortie = <strong>Valeur créée</strong> (avantages perçus).</div>
+
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" style="color:var(--purple)">SVS Composant 1</div><h4>7 Principes directeurs</h4><p>Recommandations universelles qui guident toutes les décisions.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">SVS Composant 2</div><h4>Gouvernance</h4><p>Évaluation, orientation, suivi pour que la chaîne de valeur respecte les objectifs.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">SVS Composant 3</div><h4>Chaîne de valeur du service</h4><p>6 activités clés pour créer et fournir des services.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">SVS Composant 4</div><h4>34 Pratiques</h4><p>Outils structurés pour gérer efficacement services et technologies.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">SVS Composant 5</div><h4>Amélioration continue</h4><p>Modèle cyclique en 6 étapes pour optimiser l'ensemble du système.</p></div>
+      </div>
+
+      <div class="section-header">Les 7 principes directeurs ITIL (à connaître PAR CŒUR)</div>
+      <div class="principle-grid">
+        <div class="principle-card"><div class="p-num">Principe 1</div><h4>Privilégier la valeur</h4><p>Focus sur la valeur apportée aux parties prenantes</p></div>
+        <div class="principle-card"><div class="p-num">Principe 2</div><h4>Démarrer d'où vous êtes</h4><p>Valoriser l'existant, ne pas repartir de zéro</p></div>
+        <div class="principle-card"><div class="p-num">Principe 3</div><h4>Progresser par itérations</h4><p>Avancer avec feedback continu, petits incréments</p></div>
+        <div class="principle-card"><div class="p-num">Principe 4</div><h4>Collaborer & transparence</h4><p>Visibilité et collaboration entre toutes les équipes</p></div>
+        <div class="principle-card"><div class="p-num">Principe 5</div><h4>Penser holistiquement</h4><p>Travailler de façon globale, voir le système entier</p></div>
+        <div class="principle-card"><div class="p-num">Principe 6</div><h4>Simplicité & praticité</h4><p>Faire simple, éliminer ce qui ne crée pas de valeur</p></div>
+        <div class="principle-card"><div class="p-num">Principe 7</div><h4>Optimiser & automatiser</h4><p>Optimiser d'abord manuellement, puis automatiser</p></div>
+      </div>
+
+      <div class="section-header">La chaîne de valeur du service (6 activités)</div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="c-num">1</div><div class="c-name">Planification</div><div class="c-sub">Besoins stratégiques</div></div>
+        <div class="chain-step"><div class="c-num">2</div><div class="c-name">Amélioration</div><div class="c-sub">Mise en œuvre</div></div>
+        <div class="chain-step"><div class="c-num">3</div><div class="c-name">Engagement</div><div class="c-sub">Parties prenantes</div></div>
+        <div class="chain-step"><div class="c-num">4</div><div class="c-name">Conception</div><div class="c-sub">& Transition</div></div>
+        <div class="chain-step"><div class="c-num">5</div><div class="c-name">Obtention</div><div class="c-sub">Construction</div></div>
+        <div class="chain-step"><div class="c-num">6</div><div class="c-name">Fourniture</div><div class="c-sub">& Support</div></div>
+      </div>
+
+      <div class="section-header">Les 34 pratiques ITIL (3 catégories)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Catégorie</th><th>Exemples clés</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Pratiques générales de gestion</strong></td><td>Gouvernance de l'information (conformité/données), gestion du risque, amélioration continue, gestion financière des services</td></tr>
+            <tr><td><strong>Pratiques de gestion des services</strong></td><td>Gestion des niveaux de service (SLA), gestion des incidents (réponse rapide), gestion des problèmes (cause racine), gestion des changements</td></tr>
+            <tr><td><strong>Pratiques de gestion technique</strong></td><td>Gestion des infrastructures et plateformes (surveillance/optimisation), développement et gestion des logiciels (déploiement fiable)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-header">Gouvernance & Amélioration continue</div>
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" style="color:var(--accent)">Gouvernance</div><h4>Évaluation + Orientation + Suivi</h4><p>S'appuie sur <strong>KPI</strong> (valeur de la performance actuelle) et <strong>CSF</strong> (Critical Success Factor — valeur de l'objectif à atteindre). Travaille avec l'amélioration continue.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--green)">Amélioration Continue (6 étapes)</div><h4>Modèle cyclique</h4><p>1. Quelle est la vision ? → 2. Où en sommes-nous ? → 3. Où voulons-nous aller ? → 4. Comment y arriver ? → 5. Passer à l'action → 6. Sommes-nous arrivés ? → recommencer</p></div>
+      </div>
+
+      <div class="section-header">Les 4 dimensions du management des services</div>
+      <div class="cards-grid">
+        <div class="card"><div class="card-label" style="color:var(--orange)">Dimension 1</div><h4>Organisation & Personnes</h4><p>Dimension <em>culturelle</em> : rôles, compétences, culture organisationnelle, structure.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--accent)">Dimension 2</div><h4>Information & Technologie</h4><p>Dimension <em>des données</em> : systèmes, outils, technologies de l'information utilisées.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--teal)">Dimension 3</div><h4>Partenaires & Fournisseurs</h4><p>Dimension <em>relationnelle</em> : gestion des relations avec les partenaires et fournisseurs externes.</p></div>
+        <div class="card"><div class="card-label" style="color:var(--purple)">Dimension 4</div><h4>Flux de valeur & Processus</h4><p>Dimension <em>opérationnelle</em> : activités, flux de travail et processus de création de valeur.</p></div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span><strong>Cas pratique :</strong> Gestion incidents cloud (interruptions fréquentes) → Workflow automatisé ITIL → <strong>−30% MTTR</strong>. Délais accès nouveaux services → identification goulots + collaboration IT-métiers → <strong>+20% délais de livraison</strong>.</span>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="showPage('ex4')">✏️ Faire les exercices Ch.4</button>
+        <button class="btn btn-secondary" onclick="showPage('exams')">🎓 Passer les examens →</button>
+      </div>
+    </div>
+
+    <!-- ============================== EX1 ============================== -->
+    <div id="page-ex1" class="page">
+      <div class="page-title">Exercices — Chapitre 1</div>
+      <div class="page-sub">Introduction aux Systèmes d'Information</div>
+
+      <!-- Q1 QCM -->
+      <div class="exercise" id="ex1-q1">
+        <div class="exercise-header">
+          <div class="ex-num mc">1</div>
+          <div><div class="ex-type">QCM</div></div>
+        </div>
+        <div class="ex-question">Quelle est la définition complète d'un Système d'Information ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex1-q1',false,'A')"><span class="opt-letter">A</span>Un ensemble de logiciels permettant de stocker des données.</div>
+          <div class="option" onclick="checkMC(this,'ex1-q1',false,'B')"><span class="opt-letter">B</span>Un réseau informatique reliant les employés d'une organisation.</div>
+          <div class="option" onclick="checkMC(this,'ex1-q1',true,'C')"><span class="opt-letter">C</span>Un ensemble organisé de ressources humaines, technologiques et organisationnelles qui collectent, traitent, stockent et diffusent des informations.</div>
+          <div class="option" onclick="checkMC(this,'ex1-q1',false,'D')"><span class="opt-letter">D</span>Un outil de gestion de projets informatiques.</div>
+        </div>
+        <div class="feedback" id="fb-ex1-q1"></div>
+      </div>
+
+      <!-- Q2 Vrai/Faux -->
+      <div class="exercise" id="ex1-q2">
+        <div class="exercise-header">
+          <div class="ex-num tf">2</div>
+          <div><div class="ex-type">Vrai / Faux</div></div>
+        </div>
+        <div class="ex-question">Dans la pyramide DIKW, l'<span class="hl">Information</span> est une donnée contextualisée, tandis que la <span class="hl">Connaissance</span> correspond à un fait brut sans signification.</div>
+        <div class="tf-options">
+          <button class="tf-btn" onclick="checkTF(this,'ex1-q2',false)">✗ Faux</button>
+          <button class="tf-btn" onclick="checkTF(this,'ex1-q2',true)">✓ Vrai</button>
+        </div>
+        <div class="feedback" id="fb-ex1-q2"></div>
+      </div>
+
+      <!-- Q3 QCM -->
+      <div class="exercise" id="ex1-q3">
+        <div class="exercise-header">
+          <div class="ex-num mc">3</div>
+          <div><div class="ex-type">QCM</div></div>
+        </div>
+        <div class="ex-question">Laquelle de ces options n'est PAS une composante d'un SI ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex1-q3',false,'A')"><span class="opt-letter">A</span>Matériel (hardware)</div>
+          <div class="option" onclick="checkMC(this,'ex1-q3',false,'B')"><span class="opt-letter">B</span>Processus</div>
+          <div class="option" onclick="checkMC(this,'ex1-q3',true,'C')"><span class="opt-letter">C</span>Stratégie marketing</div>
+          <div class="option" onclick="checkMC(this,'ex1-q3',false,'D')"><span class="opt-letter">D</span>Utilisateurs</div>
+        </div>
+        <div class="feedback" id="fb-ex1-q3"></div>
+      </div>
+
+      <!-- Q4 Correspondance -->
+      <div class="exercise" id="ex1-q4">
+        <div class="exercise-header">
+          <div class="ex-num match">4</div>
+          <div><div class="ex-type">Association</div></div>
+        </div>
+        <div class="ex-question">Associe chaque fonction du SI à sa description :</div>
+        <div class="match-container">
+          <div class="match-col">
+            <h4>Fonction</h4>
+            <div class="match-item" id="m1-left" onclick="matchSelect('m1','left',this)">Collecte</div>
+            <div class="match-item" id="m2-left" onclick="matchSelect('m2','left',this)">Stockage</div>
+            <div class="match-item" id="m3-left" onclick="matchSelect('m3','left',this)">Traitement</div>
+            <div class="match-item" id="m4-left" onclick="matchSelect('m4','left',this)">Diffusion</div>
+          </div>
+          <div class="match-col">
+            <h4>Description</h4>
+            <div class="match-item" id="m3-right" onclick="matchSelect('m3','right',this)">Transformer en informations exploitables (IA, ML, BI)</div>
+            <div class="match-item" id="m1-right" onclick="matchSelect('m1','right',this)">Rassembler des données depuis des sources internes et externes</div>
+            <div class="match-item" id="m4-right" onclick="matchSelect('m4','right',this)">Partager l'info aux parties prenantes (tableaux de bord, APIs)</div>
+            <div class="match-item" id="m2-right" onclick="matchSelect('m2','right',this)">Conserver les données de façon organisée et sécurisée</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb-ex1-q4"></div>
+      </div>
+
+      <!-- Q5 Compléter -->
+      <div class="exercise" id="ex1-q5">
+        <div class="exercise-header">
+          <div class="ex-num fill">5</div>
+          <div><div class="ex-type">Compléter</div></div>
+        </div>
+        <div class="ex-question">Complète : Le concept <span class="hl">Big Data</span> est caractérisé par 3 propriétés majeures : le volume, la _______ et la variété.</div>
+        <input type="text" class="fill-input" id="fill-ex1-q5" placeholder="Tape ta réponse ici...">
+        <button class="btn btn-primary" onclick="checkFill('ex1-q5','vélocité',['velocite','vélocité','velocité','velocity','vitesse'])">Vérifier</button>
+        <div class="feedback" id="fb-ex1-q5"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-green" onclick="showPage('exams')">🎓 Passer le micro-examen Ch.1</button>
+        <button class="btn btn-secondary" onclick="showPage('ch1')">← Revoir le cours</button>
+      </div>
+    </div>
+
+    <!-- ============================== EX2 ============================== -->
+    <div id="page-ex2" class="page">
+      <div class="page-title">Exercices — Chapitre 2</div>
+      <div class="page-sub">Types et Rôles des SI</div>
+
+      <div class="exercise" id="ex2-q1">
+        <div class="exercise-header"><div class="ex-num mc">1</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Un directeur régional utilise un tableau de bord interactif pour identifier les zones où les ventes sont faibles et ajuster la stratégie de distribution. Quel type de SI utilise-t-il ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex2-q1',false,'A')"><span class="opt-letter">A</span>Système d'information opérationnel</div>
+          <div class="option" onclick="checkMC(this,'ex2-q1',true,'B')"><span class="opt-letter">B</span>Système d'information décisionnel</div>
+          <div class="option" onclick="checkMC(this,'ex2-q1',false,'C')"><span class="opt-letter">C</span>Système d'information stratégique</div>
+          <div class="option" onclick="checkMC(this,'ex2-q1',false,'D')"><span class="opt-letter">D</span>Système d'information collaboratif</div>
+        </div>
+        <div class="feedback" id="fb-ex2-q1"></div>
+      </div>
+
+      <div class="exercise" id="ex2-q2">
+        <div class="exercise-header"><div class="ex-num tf">2</div><div><div class="ex-type">Vrai / Faux</div></div></div>
+        <div class="ex-question">Les systèmes d'information stratégiques sont principalement utilisés par les employés opérationnels pour gérer les tâches répétitives au quotidien.</div>
+        <div class="tf-options">
+          <button class="tf-btn" onclick="checkTF(this,'ex2-q2',true)">✗ Faux</button>
+          <button class="tf-btn" onclick="checkTF(this,'ex2-q2',false)">✓ Vrai</button>
+        </div>
+        <div class="feedback" id="fb-ex2-q2"></div>
+      </div>
+
+      <div class="exercise" id="ex2-q3">
+        <div class="exercise-header"><div class="ex-num mc">3</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Selon l'OCDE, qu'est-ce que l'innovation disruptive ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex2-q3',false,'A')"><span class="opt-letter">A</span>Une innovation qui améliore progressivement un processus existant.</div>
+          <div class="option" onclick="checkMC(this,'ex2-q3',true,'B')"><span class="opt-letter">B</span>Une innovation qui rend un processus complètement obsolète, créant une nouvelle valeur.</div>
+          <div class="option" onclick="checkMC(this,'ex2-q3',false,'C')"><span class="opt-letter">C</span>Une innovation qui perturbe temporairement les opérations avant d'être absorbée.</div>
+          <div class="option" onclick="checkMC(this,'ex2-q3',false,'D')"><span class="opt-letter">D</span>Une technologie développée dans les pays en développement.</div>
+        </div>
+        <div class="feedback" id="fb-ex2-q3"></div>
+      </div>
+
+      <div class="exercise" id="ex2-q4">
+        <div class="exercise-header"><div class="ex-num match">4</div><div><div class="ex-type">Association</div></div></div>
+        <div class="ex-question">Associe chaque outil à son type de SI :</div>
+        <div class="match-container">
+          <div class="match-col">
+            <h4>Outil</h4>
+            <div class="match-item" id="n1-left" onclick="matchSelect('n1','left',this)">Power BI / Tableau</div>
+            <div class="match-item" id="n2-left" onclick="matchSelect('n2','left',this)">SAP ERP / CRM</div>
+            <div class="match-item" id="n3-left" onclick="matchSelect('n3','left',this)">Salesforce Einstein</div>
+            <div class="match-item" id="n4-left" onclick="matchSelect('n4','left',this)">Slack / Teams</div>
+          </div>
+          <div class="match-col">
+            <h4>Type de SI</h4>
+            <div class="match-item" id="n4-right" onclick="matchSelect('n4','right',this)">Collaboratif</div>
+            <div class="match-item" id="n2-right" onclick="matchSelect('n2','right',this)">Opérationnel</div>
+            <div class="match-item" id="n3-right" onclick="matchSelect('n3','right',this)">Stratégique (IA)</div>
+            <div class="match-item" id="n1-right" onclick="matchSelect('n1','right',this)">Décisionnel (BI)</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb-ex2-q4"></div>
+      </div>
+
+      <div class="exercise" id="ex2-q5">
+        <div class="exercise-header"><div class="ex-num mc">5</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Dans le rôle sécuritaire des SI, IAM signifie :</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex2-q5',false,'A')"><span class="opt-letter">A</span>Integrated Application Management</div>
+          <div class="option" onclick="checkMC(this,'ex2-q5',false,'B')"><span class="opt-letter">B</span>International Automated Monitoring</div>
+          <div class="option" onclick="checkMC(this,'ex2-q5',true,'C')"><span class="opt-letter">C</span>Identity and Access Management (Gestion des identités et des accès)</div>
+          <div class="option" onclick="checkMC(this,'ex2-q5',false,'D')"><span class="opt-letter">D</span>Information Architecture Model</div>
+        </div>
+        <div class="feedback" id="fb-ex2-q5"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-green" onclick="showPage('exams')">🎓 Passer le micro-examen Ch.2</button>
+        <button class="btn btn-secondary" onclick="showPage('ch2')">← Revoir le cours</button>
+      </div>
+    </div>
+
+    <!-- ============================== EX3 ============================== -->
+    <div id="page-ex3" class="page">
+      <div class="page-title">Exercices — Chapitre 3</div>
+      <div class="page-sub">Gestion des Systèmes d'Information</div>
+
+      <div class="exercise" id="ex3-q1">
+        <div class="exercise-header"><div class="ex-num mc">1</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Les principes CIA en sécurité des SI font référence à :</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex3-q1',true,'A')"><span class="opt-letter">A</span>Confidentialité, Intégrité, Disponibilité (Availability)</div>
+          <div class="option" onclick="checkMC(this,'ex3-q1',false,'B')"><span class="opt-letter">B</span>Contrôle, Infrastructure, Automatisation</div>
+          <div class="option" onclick="checkMC(this,'ex3-q1',false,'C')"><span class="opt-letter">C</span>Cloud, Intelligence, Agilité</div>
+          <div class="option" onclick="checkMC(this,'ex3-q1',false,'D')"><span class="opt-letter">D</span>Conformité, Innovation, Architecture</div>
+        </div>
+        <div class="feedback" id="fb-ex3-q1"></div>
+      </div>
+
+      <div class="exercise" id="ex3-q2">
+        <div class="exercise-header"><div class="ex-num tf">2</div><div><div class="ex-type">Vrai / Faux</div></div></div>
+        <div class="ex-question">Le MTTR (Mean Time To Repair) est un KPI de gestion des SI qui mesure le temps moyen nécessaire pour résoudre un incident. L'objectif est qu'il soit inférieur ou égal à 4 heures.</div>
+        <div class="tf-options">
+          <button class="tf-btn" onclick="checkTF(this,'ex3-q2',false)">✗ Faux</button>
+          <button class="tf-btn" onclick="checkTF(this,'ex3-q2',true)">✓ Vrai</button>
+        </div>
+        <div class="feedback" id="fb-ex3-q2"></div>
+      </div>
+
+      <div class="exercise" id="ex3-q3">
+        <div class="exercise-header"><div class="ex-num mc">3</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Une entreprise déploie SAP pour centraliser ses stocks, sa production et ses ventes. Dans quelle dimension de la gestion des SI cela s'inscrit-il ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex3-q3',false,'A')"><span class="opt-letter">A</span>Dimension A — Planification stratégique</div>
+          <div class="option" onclick="checkMC(this,'ex3-q3',true,'B')"><span class="opt-letter">B</span>Dimension B — Développement et maintenance</div>
+          <div class="option" onclick="checkMC(this,'ex3-q3',false,'C')"><span class="opt-letter">C</span>Dimension D — Sécurité et gestion des risques</div>
+          <div class="option" onclick="checkMC(this,'ex3-q3',false,'D')"><span class="opt-letter">D</span>Dimension E — Stratégie et gouvernance</div>
+        </div>
+        <div class="feedback" id="fb-ex3-q3"></div>
+      </div>
+
+      <div class="exercise" id="ex3-q4">
+        <div class="exercise-header"><div class="ex-num fill">4</div><div><div class="ex-type">Compléter</div></div></div>
+        <div class="ex-question">Complète : Le <span class="hl">PCA</span> signifie Plan de _______ d'Activité. Il vise à maintenir les opérations en cas d'incident majeur.</div>
+        <input type="text" class="fill-input" id="fill-ex3-q4" placeholder="Tape ta réponse ici...">
+        <button class="btn btn-primary" onclick="checkFill('ex3-q4','continuité',['continuite','continuité','continuity','continuation'])">Vérifier</button>
+        <div class="feedback" id="fb-ex3-q4"></div>
+      </div>
+
+      <div class="exercise" id="ex3-q5">
+        <div class="exercise-header"><div class="ex-num mc">5</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Parmi les outils suivants, lequel est spécifiquement utilisé pour le monitoring (surveillance en temps réel) des infrastructures SI ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex3-q5',false,'A')"><span class="opt-letter">A</span>ServiceNow</div>
+          <div class="option" onclick="checkMC(this,'ex3-q5',true,'B')"><span class="opt-letter">B</span>Nagios / Zabbix</div>
+          <div class="option" onclick="checkMC(this,'ex3-q5',false,'C')"><span class="opt-letter">C</span>Power BI</div>
+          <div class="option" onclick="checkMC(this,'ex3-q5',false,'D')"><span class="opt-letter">D</span>SPSS</div>
+        </div>
+        <div class="feedback" id="fb-ex3-q5"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-green" onclick="showPage('exams')">🎓 Passer le micro-examen Ch.3</button>
+        <button class="btn btn-secondary" onclick="showPage('ch3')">← Revoir le cours</button>
+      </div>
+    </div>
+
+    <!-- ============================== EX4 ============================== -->
+    <div id="page-ex4" class="page">
+      <div class="page-title">Exercices — Chapitre 4</div>
+      <div class="page-sub">Cadre ITIL 4</div>
+
+      <div class="exercise" id="ex4-q1">
+        <div class="exercise-header"><div class="ex-num mc">1</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">ITIL 4 signifie :</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex4-q1',false,'A')"><span class="opt-letter">A</span>Integrated Technology Innovation Library</div>
+          <div class="option" onclick="checkMC(this,'ex4-q1',true,'B')"><span class="opt-letter">B</span>Information Technology Infrastructure Library</div>
+          <div class="option" onclick="checkMC(this,'ex4-q1',false,'C')"><span class="opt-letter">C</span>Internet Technology Infrastructure Layout</div>
+          <div class="option" onclick="checkMC(this,'ex4-q1',false,'D')"><span class="opt-letter">D</span>Information Technology Integration Lab</div>
+        </div>
+        <div class="feedback" id="fb-ex4-q1"></div>
+      </div>
+
+      <div class="exercise" id="ex4-q2">
+        <div class="exercise-header"><div class="ex-num mc">2</div><div><div class="ex-type">QCM</div></div></div>
+        <div class="ex-question">Combien de pratiques ITIL 4 existe-t-il au total, réparties en 3 catégories ?</div>
+        <div class="options">
+          <div class="option" onclick="checkMC(this,'ex4-q2',false,'A')"><span class="opt-letter">A</span>26 pratiques</div>
+          <div class="option" onclick="checkMC(this,'ex4-q2',false,'B')"><span class="opt-letter">B</span>28 pratiques</div>
+          <div class="option" onclick="checkMC(this,'ex4-q2',true,'C')"><span class="opt-letter">C</span>34 pratiques</div>
+          <div class="option" onclick="checkMC(this,'ex4-q2',false,'D')"><span class="opt-letter">D</span>42 pratiques</div>
+        </div>
+        <div class="feedback" id="fb-ex4-q2"></div>
+      </div>
+
+      <div class="exercise" id="ex4-q3">
+        <div class="exercise-header"><div class="ex-num tf">3</div><div><div class="ex-type">Vrai / Faux</div></div></div>
+        <div class="ex-question">Le principe directeur ITIL "Démarrer d'où vous êtes" signifie qu'une organisation doit toujours repartir de zéro lors de l'implémentation d'ITIL, sans prendre en compte l'existant.</div>
+        <div class="tf-options">
+          <button class="tf-btn" onclick="checkTF(this,'ex4-q3',true)">✗ Faux</button>
+          <button class="tf-btn" onclick="checkTF(this,'ex4-q3',false)">✓ Vrai</button>
+        </div>
+        <div class="feedback" id="fb-ex4-q3"></div>
+      </div>
+
+      <div class="exercise" id="ex4-q4">
+        <div class="exercise-header"><div class="ex-num match">4</div><div><div class="ex-type">Association</div></div></div>
+        <div class="ex-question">Associe chaque dimension ITIL 4 à sa description :</div>
+        <div class="match-container">
+          <div class="match-col">
+            <h4>Dimension</h4>
+            <div class="match-item" id="p1-left" onclick="matchSelect('p1','left',this)">Organisation & Personnes</div>
+            <div class="match-item" id="p2-left" onclick="matchSelect('p2','left',this)">Information & Technologie</div>
+            <div class="match-item" id="p3-left" onclick="matchSelect('p3','left',this)">Partenaires & Fournisseurs</div>
+            <div class="match-item" id="p4-left" onclick="matchSelect('p4','left',this)">Flux de valeur & Processus</div>
+          </div>
+          <div class="match-col">
+            <h4>Description</h4>
+            <div class="match-item" id="p4-right" onclick="matchSelect('p4','right',this)">Dimension opérationnelle : activités et flux de travail</div>
+            <div class="match-item" id="p1-right" onclick="matchSelect('p1','right',this)">Dimension culturelle : rôles, compétences, culture</div>
+            <div class="match-item" id="p2-right" onclick="matchSelect('p2','right',this)">Dimension des données : systèmes et outils</div>
+            <div class="match-item" id="p3-right" onclick="matchSelect('p3','right',this)">Dimension relationnelle : partenaires externes</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb-ex4-q4"></div>
+      </div>
+
+      <div class="exercise" id="ex4-q5">
+        <div class="exercise-header"><div class="ex-num fill">5</div><div><div class="ex-type">Compléter</div></div></div>
+        <div class="ex-question">Dans le modèle d'amélioration continue ITIL, la <span class="hl">6ème étape</span> consiste à évaluer les métriques et KPI pour répondre à la question : "_______ sommes-nous arrivés ?"</div>
+        <input type="text" class="fill-input" id="fill-ex4-q5" placeholder="Tape ta réponse ici...">
+        <button class="btn btn-primary" onclick="checkFill('ex4-q5','sommes',['sommes','sommes-nous','avons','avons-nous','y sommes'])">Vérifier</button>
+        <div class="feedback" id="fb-ex4-q5"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-green" onclick="showPage('exams')">🎓 Passer les micro-examens</button>
+        <button class="btn btn-secondary" onclick="showPage('ch4')">← Revoir le cours</button>
+      </div>
+    </div>
+
+    <!-- ============================== EXAMS ============================== -->
+    <div id="page-exams" class="page">
+      <div class="page-title">Micro-examens</div>
+      <div class="page-sub">Teste-toi comme à l'examen — chronométré, noté</div>
+
+      <div id="exam-select-screen">
+        <div class="exam-select">
+          <div class="exam-card" onclick="startExam('exam1')">
+            <div class="ec-icon">📘</div>
+            <h3>Micro-examen 1</h3>
+            <p>Introduction aux SI</p>
+            <div class="ec-meta"><span class="chip accent">10 questions</span><span class="chip">15 min</span></div>
+          </div>
+          <div class="exam-card" onclick="startExam('exam2')">
+            <div class="ec-icon">📊</div>
+            <h3>Micro-examen 2</h3>
+            <p>Types et Rôles des SI</p>
+            <div class="ec-meta"><span class="chip accent">10 questions</span><span class="chip">15 min</span></div>
+          </div>
+          <div class="exam-card" onclick="startExam('exam3')">
+            <div class="ec-icon">⚙️</div>
+            <h3>Micro-examen 3</h3>
+            <p>Gestion des SI</p>
+            <div class="ec-meta"><span class="chip accent">10 questions</span><span class="chip">15 min</span></div>
+          </div>
+          <div class="exam-card" onclick="startExam('exam4')">
+            <div class="ec-icon">🔷</div>
+            <h3>Micro-examen 4</h3>
+            <p>ITIL 4</p>
+            <div class="ec-meta"><span class="chip accent">10 questions</span><span class="chip">15 min</span></div>
+          </div>
+          <div class="exam-card" onclick="startExam('examFinal')">
+            <div class="ec-icon">🎓</div>
+            <h3>Examen final</h3>
+            <p>Tous les chapitres</p>
+            <div class="ec-meta"><span class="chip purple">20 questions</span><span class="chip">30 min</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="exam-running" style="display:none;">
+        <div class="exam-header">
+          <h2 id="exam-title">Micro-examen</h2>
+          <p id="exam-subtitle">Répondez à toutes les questions</p>
+          <div class="exam-timer"><div class="dot"></div><span id="timer-display">15:00</span></div>
+        </div>
+        <div class="exam-progress-bar-wrap">
+          <div class="exam-progress-label"><span id="exam-q-label">Question 1 / 10</span><span id="exam-score-live">0 pts</span></div>
+          <div class="exam-bar"><div class="exam-bar-fill" id="exam-bar-fill" style="width:0%"></div></div>
+        </div>
+        <div id="exam-questions-container"></div>
+        <div class="exam-nav">
+          <button class="btn btn-secondary" id="btn-prev" onclick="examNav(-1)" disabled>← Précédent</button>
+          <span id="exam-dots" style="flex:1;text-align:center;font-size:12px;color:var(--text3)"></span>
+          <button class="btn btn-primary" id="btn-next" onclick="examNav(1)">Suivant →</button>
+        </div>
+      </div>
+
+      <div id="exam-results" style="display:none;">
+        <div class="result-card">
+          <div class="score-circle" id="result-circle">
+            <span id="result-pct">0%</span>
+            <span class="score-label" id="result-grade">—</span>
+          </div>
+          <h3 id="result-title" style="font-size:18px;margin-bottom:4px;"></h3>
+          <p id="result-msg" style="color:var(--text2);font-size:13px;margin-bottom:16px;"></p>
+          <div class="result-breakdown">
+            <div class="rb-item c"><div class="rb-val" id="result-correct">0</div><div class="rb-lbl">Correctes ✓</div></div>
+            <div class="rb-item w"><div class="rb-val" id="result-wrong">0</div><div class="rb-lbl">Incorrectes ✗</div></div>
+            <div class="rb-item s"><div class="rb-val" id="result-skipped">0</div><div class="rb-lbl">Non répondues</div></div>
+          </div>
+        </div>
+        <div class="answer-review" id="answer-review-list"></div>
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="resetExam()">🔄 Refaire cet examen</button>
+          <button class="btn btn-secondary" onclick="backToExamList()">← Choisir un autre examen</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// NAVIGATION
+// ============================================================
+const pageTitles = {
+  home:'Accueil', ch1:'Ch.1 — Introduction aux SI', ch2:'Ch.2 — Types & Rôles',
+  ch3:'Ch.3 — Gestion des SI', ch4:'Ch.4 — ITIL 4',
+  ex1:'Exercices Ch.1', ex2:'Exercices Ch.2', ex3:'Exercices Ch.3', ex4:'Exercices Ch.4',
+  exams:'Micro-examens'
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id] || id;
+  const navBtns = document.querySelectorAll('.nav-item');
+  navBtns.forEach(btn => {
+    if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'"+id+"'")) {
+      btn.classList.add('active');
+    }
+  });
+}
+
+// ============================================================
+// EXERCISES LOGIC
+// ============================================================
+const exerciseScores = {};
+
+function checkMC(el, qid, isCorrect, letter) {
+  const container = document.getElementById(qid);
+  if(container.dataset.answered) return;
+  container.dataset.answered = '1';
+  const opts = container.querySelectorAll('.option');
+  opts.forEach(o => {
+    o.style.pointerEvents = 'none';
+    o.onclick = null;
+  });
+  const fb = document.getElementById('fb-'+qid);
+  if(isCorrect) {
+    el.classList.add('correct');
+    fb.className = 'feedback show ok';
+    fb.innerHTML = '✓ &nbsp;Bonne réponse !';
+    exerciseScores[qid] = 1;
+  } else {
+    el.classList.add('wrong');
+    fb.className = 'feedback show ko';
+    fb.innerHTML = '✗ &nbsp;Incorrect. Relis le cours pour trouver la bonne réponse.';
+    opts.forEach(o => { if(o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) o.classList.add('correct'); });
+    exerciseScores[qid] = 0;
+  }
+  updateProgress();
+}
+
+function checkTF(el, qid, isCorrect) {
+  const container = document.getElementById(qid);
+  if(container.dataset.answered) return;
+  container.dataset.answered = '1';
+  container.querySelectorAll('.tf-btn').forEach(b => { b.style.pointerEvents='none'; b.onclick=null; });
+  const fb = document.getElementById('fb-'+qid);
+  if(isCorrect) {
+    el.classList.add('correct');
+    fb.className = 'feedback show ok';
+    fb.innerHTML = '✓ &nbsp;Bonne réponse !';
+    exerciseScores[qid] = 1;
+  } else {
+    el.classList.add('wrong');
+    fb.className = 'feedback show ko';
+    fb.innerHTML = '✗ &nbsp;Incorrect. L\'autre réponse était correcte.';
+    exerciseScores[qid] = 0;
+  }
+  updateProgress();
+}
+
+function checkFill(qid, correct, accepted) {
+  const input = document.getElementById('fill-'+qid);
+  const val = input.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const acceptedNorm = accepted.map(a => a.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const fb = document.getElementById('fb-'+qid);
+  const container = document.getElementById(qid);
+  if(container.dataset.answered) return;
+  if(acceptedNorm.includes(val)) {
+    input.classList.add('correct');
+    fb.className = 'feedback show ok';
+    fb.innerHTML = '✓ &nbsp;Correct ! La réponse est : <strong>' + correct + '</strong>';
+    exerciseScores[qid] = 1;
+  } else {
+    input.classList.add('wrong');
+    fb.className = 'feedback show ko';
+    fb.innerHTML = '✗ &nbsp;Incorrect. La bonne réponse était : <strong>' + correct + '</strong>';
+    exerciseScores[qid] = 0;
+  }
+  container.dataset.answered = '1';
+  input.disabled = true;
+  updateProgress();
+}
+
+// Matching logic
+let matchState = {};
+function matchSelect(id, side, el) {
+  if(el.classList.contains('matched') || el.classList.contains('wrong-match')) return;
+  if(!matchState[id]) matchState[id] = {};
+  if(matchState[id][side]) {
+    const prev = matchState[id][side];
+    if(prev !== el) prev.classList.remove('selected');
+  }
+  el.classList.add('selected');
+  matchState[id][side] = el;
+  if(matchState[id].left && matchState[id].right) {
+    const lid = matchState[id].left.id.split('-')[0];
+    const rid = matchState[id].right.id.split('-')[0];
+    if(lid === rid) {
+      matchState[id].left.classList.remove('selected'); matchState[id].left.classList.add('matched');
+      matchState[id].right.classList.remove('selected'); matchState[id].right.classList.add('matched');
+    } else {
+      matchState[id].left.classList.remove('selected'); matchState[id].left.classList.add('wrong-match');
+      matchState[id].right.classList.remove('selected'); matchState[id].right.classList.add('wrong-match');
+      setTimeout(() => {
+        if(matchState[id]) {
+          if(matchState[id].left) { matchState[id].left.classList.remove('wrong-match'); }
+          if(matchState[id].right) { matchState[id].right.classList.remove('wrong-match'); }
+        }
+        matchState[id] = {};
+      }, 700);
+    }
+    delete matchState[id].left;
+    delete matchState[id].right;
+    checkMatchComplete(id);
+  }
+}
+
+function checkMatchComplete(prefix) {
+  const qid = prefix.split('-')[0];
+  // Find which exercise this belongs to
+  let exId = null;
+  ['ex1-q4','ex2-q4','ex4-q4'].forEach(q => {
+    const container = document.getElementById(q);
+    if(container && container.querySelector('#'+prefix+'-left')) exId = q;
+  });
+  if(!exId) return;
+  const container = document.getElementById(exId);
+  const all = container.querySelectorAll('.match-item');
+  const allMatched = Array.from(all).every(m => m.classList.contains('matched'));
+  if(allMatched && !container.dataset.answered) {
+    container.dataset.answered = '1';
+    const fb = document.getElementById('fb-'+exId);
+    fb.className = 'feedback show ok';
+    fb.innerHTML = '✓ &nbsp;Toutes les associations sont correctes !';
+    exerciseScores[exId] = 1;
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const total = 20;
+  const done = Object.keys(exerciseScores).length;
+  const pct = Math.round(done/total*100);
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+}
+
+// ============================================================
+// EXAM DATA
+// ============================================================
+const examData = {
+  exam1: {
+    title: 'Micro-examen 1', subtitle: 'Introduction aux SI', time: 900,
+    questions: [
+      {q:'Quelle est la bonne définition d\'un Système d\'Information ?', opts:['Un réseau informatique reliant les employés','Un ensemble organisé de ressources humaines, technologiques et organisationnelles qui collectent, traitent, stockent et diffusent des informations','Un outil de gestion de bases de données','Un logiciel de bureautique'], correct:1},
+      {q:'Dans la pyramide DIKW, quel niveau correspond à "un fait brut sans signification" ?', opts:['Sagesse','Connaissance','Information','Données'], correct:3},
+      {q:'Lequel n\'est PAS une composante d\'un SI ?', opts:['Matériel (Hardware)','Processus','Stratégie de communication','Utilisateurs'], correct:2},
+      {q:'Qu\'est-ce qu\'un ERP / PGI ?', opts:['Un outil de surveillance réseau','Un Progiciel de Gestion Intégré qui gère l\'ensemble des processus d\'une entreprise','Un système de gestion des ressources humaines uniquement','Un logiciel de Business Intelligence'], correct:1},
+      {q:'Parmi les 4 fonctions du SI, laquelle consiste à "rendre l\'information disponible aux bonnes parties prenantes" ?', opts:['Collecte','Stockage','Traitement','Diffusion'], correct:3},
+      {q:'Le Big Data est caractérisé par 3 V : Volume, Variété, et :', opts:['Vérification','Vélocité','Validation','Virtualisation'], correct:1},
+      {q:'SYDONIA est un exemple de logiciel métier utilisé pour :', opts:['La gestion des ressources humaines','Le dédouanement automatisé','La comptabilité générale','La surveillance réseau'], correct:1},
+      {q:'Un Data Center est :', opts:['Un logiciel de stockage en nuage','Une infrastructure physique centralisant serveurs, stockage et réseaux','Un type de base de données NoSQL','Un outil de Business Intelligence'], correct:1},
+      {q:'Dans la pyramide DIKW, au-dessus de la "Connaissance" se trouve :', opts:['Information','Données','Sagesse','Intelligence'], correct:2},
+      {q:'MongoDB est un exemple de :', opts:['Base de données SQL','Base de données NoSQL','Outil de monitoring','Logiciel ERP'], correct:1}
+    ]
+  },
+  exam2: {
+    title: 'Micro-examen 2', subtitle: 'Types et Rôles des SI', time: 900,
+    questions: [
+      {q:'Quel type de SI soutient les décisions à long terme et les initiatives d\'avantage concurrentiel ?', opts:['Opérationnel','Décisionnel','Stratégique','Collaboratif'], correct:2},
+      {q:'Power BI et Tableau sont des outils associés aux SI de type :', opts:['Opérationnel','Décisionnel','Stratégique','Sécuritaire'], correct:1},
+      {q:'Selon l\'OCDE, l\'innovation disruptive :', opts:['Améliore progressivement un processus existant','Perturbe temporairement les opérations','Rend un processus complètement obsolète en créant une nouvelle valeur','Optimise les coûts sans changer le modèle'], correct:2},
+      {q:'Les utilisateurs clés d\'un SI opérationnel sont :', opts:['Dirigeants et décideurs stratégiques','Managers et analystes','Employés et responsables opérationnels','Auditeurs et consultants'], correct:2},
+      {q:'SYDONIA (dédouanement automatisé) est un exemple de SI :', opts:['Décisionnel','Stratégique','Opérationnel','Collaboratif'], correct:2},
+      {q:'Le rôle sécuritaire des SI protège notamment grâce à :', opts:['Power BI et Tableau','Pare-feu, antivirus, IAM et sauvegardes','SharePoint et Teams','Salesforce Einstein et SPSS'], correct:1},
+      {q:'IAM signifie :', opts:['Integrated Application Management','International Automated Monitoring','Identity and Access Management','Information Architecture Model'], correct:2},
+      {q:'Quel outil est associé au rôle collaboratif des SI ?', opts:['SAP ERP','QlikView','Microsoft Teams','Nagios'], correct:2},
+      {q:'Dans l\'exemple de la chaîne de magasins, l\'analyse prédictive qui identifie les nouvelles tendances d\'achat relève du rôle :', opts:['Opérationnel','Décisionnel','Stratégique','Collaboratif'], correct:2},
+      {q:'SPSS et SAS sont des outils associés aux SI :', opts:['Opérationnels','Décisionnels','Stratégiques','Sécuritaires'], correct:2}
+    ]
+  },
+  exam3: {
+    title: 'Micro-examen 3', subtitle: 'Gestion des SI', time: 900,
+    questions: [
+      {q:'Les principes CIA en sécurité des SI signifient :', opts:['Contrôle, Infrastructure, Automatisation','Confidentialité, Intégrité, Disponibilité','Cloud, Intelligence, Agilité','Conformité, Innovation, Architecture'], correct:1},
+      {q:'La norme ISO 27001 concerne :', opts:['La gestion de la qualité','La sécurité de l\'information','Le développement logiciel','La gestion de projet'], correct:1},
+      {q:'Le MTTR mesure :', opts:['Le taux de satisfaction des utilisateurs','Le pourcentage de disponibilité des systèmes','Le temps moyen de résolution des incidents','Le budget informatique consommé'], correct:2},
+      {q:'ServiceNow et Jira Service Desk sont des outils de :', opts:['Monitoring des infrastructures','Gestion des incidents (ITSM)','Business Intelligence','Développement logiciel'], correct:1},
+      {q:'Le PCA (Plan de Continuité d\'Activité) vise à :', opts:['Planifier les achats technologiques','Maintenir les opérations en cas d\'incident majeur','Former les employés aux nouveaux outils','Auditer les systèmes informatiques'], correct:1},
+      {q:'COBIT signifie :', opts:['Control Objectives for Business and Information Technology','Control Operations and Business Integration Technology','Cloud Objectives for Integrated Technology','Control Objectives for Information and Related Technologies'], correct:3},
+      {q:'Nagios est un outil de :', opts:['Gestion de bases de données','Monitoring en temps réel des infrastructures','Business Intelligence','Gestion des identités'], correct:1},
+      {q:'Quelle est la première étape du cycle de gestion efficace d\'un SI ?', opts:['Mise en œuvre','Définition des objectifs','Analyse des besoins','Suivi et amélioration'], correct:2},
+      {q:'Le cycle de vie d\'un SI comprend, dans l\'ordre :', opts:['Analyse → Tests → Développement → Conception → Déploiement','Analyse → Conception → Développement → Tests → Déploiement','Conception → Analyse → Tests → Développement → Déploiement','Développement → Analyse → Conception → Tests → Déploiement'], correct:1},
+      {q:'Quel est l\'objectif cible de disponibilité des systèmes selon les KPIs de gestion des SI ?', opts:['≥ 95%','≥ 98%','≥ 99,9%','≥ 100%'], correct:2}
+    ]
+  },
+  exam4: {
+    title: 'Micro-examen 4', subtitle: 'ITIL 4', time: 900,
+    questions: [
+      {q:'ITIL 4 signifie :', opts:['Integrated Technology Innovation Library','Information Technology Infrastructure Library','Internet Technology Infrastructure Layout','Information Technology Integration Lab'], correct:1},
+      {q:'Le SVS dans ITIL 4 signifie :', opts:['Service Value Structure','Système de Valeur des Services','System Validation Scheme','Service Verification Standard'], correct:1},
+      {q:'Combien de pratiques compte ITIL 4 ?', opts:['26','28','34','42'], correct:2},
+      {q:'Quel principe ITIL dit qu\'il faut valoriser l\'existant sans repartir de zéro ?', opts:['Privilégier la valeur','Démarrer d\'où vous êtes','Progresser par itérations','Penser holistiquement'], correct:1},
+      {q:'La chaîne de valeur du service comprend combien d\'activités ?', opts:['4','5','6','7'], correct:2},
+      {q:'Le modèle d\'amélioration continue ITIL 4 comprend combien d\'étapes ?', opts:['4','5','6','7'], correct:2},
+      {q:'Dans les 4 dimensions ITIL, la dimension "culturelle" est :', opts:['Information & Technologie','Partenaires & Fournisseurs','Organisation & Personnes','Flux de valeur & Processus'], correct:2},
+      {q:'La gouvernance dans le SVS s\'appuie sur KPI et :', opts:['SLA','CSF (Critical Success Factors)','MTTR','CIA'], correct:1},
+      {q:'Quel outil ITSM est mentionné dans ITIL 4 pour la gestion des incidents et des SLA ?', opts:['Nagios','Zabbix','ServiceNow','QlikView'], correct:2},
+      {q:'Selon ITIL 4, la mise en œuvre a permis une réduction de _____ du MTTR dans un cas de gestion d\'incidents cloud :', opts:['10%','20%','30%','40%'], correct:2}
+    ]
+  },
+  examFinal: {
+    title: 'Examen Final', subtitle: 'Tous chapitres confondus', time: 1800,
+    questions: [
+      {q:'Un SI est un ensemble organisé de ressources humaines, technologiques et organisationnelles. Quel est son objectif principal ?', opts:['Remplacer les employés par des automatismes','Collecter, traiter, stocker et diffuser des informations pour répondre aux besoins d\'une organisation','Réduire les coûts informatiques','Connecter les équipements réseau entre eux'], correct:1},
+      {q:'Dans la pyramide DIKW, quelle est la bonne hiérarchie de bas en haut ?', opts:['Connaissance → Données → Information → Sagesse','Données → Connaissance → Information → Sagesse','Données → Information → Connaissance → Sagesse','Information → Données → Connaissance → Sagesse'], correct:2},
+      {q:'Un système de caisse enregistreuse (POS) qui met à jour les stocks en temps réel est un exemple de SI :', opts:['Décisionnel','Stratégique','Opérationnel','Collaboratif'], correct:2},
+      {q:'Quel type de SI utilise des outils comme Power BI, Tableau ou QlikView ?', opts:['Opérationnel','Décisionnel','Stratégique','Sécuritaire'], correct:1},
+      {q:'Parmi les 5 composantes d\'un SI, laquelle regroupe les "capteurs IoT, routeurs et serveurs" ?', opts:['Logiciels','Données','Matériel (Hardware)','Processus'], correct:2},
+      {q:'La triade CIA en sécurité des SI signifie :', opts:['Cloud, Intégration, Architecture','Confidentialité, Intégrité, Disponibilité','Contrôle, Infrastructure, Automatisation','Conformité, Innovation, Agilité'], correct:1},
+      {q:'Lequel de ces outils est spécifiquement un outil de monitoring d\'infrastructure ?', opts:['Power BI','ServiceNow','Nagios/Zabbix','Salesforce'], correct:2},
+      {q:'ITIL 4 compte combien de principes directeurs ?', opts:['5','6','7','8'], correct:2},
+      {q:'Le SVS (Système de Valeur des Services) d\'ITIL 4 comprend combien de composants ?', opts:['3','4','5','6'], correct:2},
+      {q:'L\'innovation disruptive selon l\'OCDE :', opts:['Améliore graduellement un processus','Rend un processus obsolète et crée une nouvelle valeur','Perturbe temporairement les opérations','Optimise les coûts sans changer le modèle'], correct:1},
+      {q:'COBIT est un framework de :', opts:['Développement logiciel agile','Gestion des risques et alignement stratégique des SI','Surveillance des réseaux informatiques','Gestion des ressources humaines'], correct:1},
+      {q:'Quel est le KPI cible pour la disponibilité des systèmes SI ?', opts:['≥ 90%','≥ 95%','≥ 99%','≥ 99,9%'], correct:3},
+      {q:'La dimension "Partenaires & Fournisseurs" dans ITIL 4 est la dimension :', opts:['Culturelle','Des données','Relationnelle','Opérationnelle'], correct:2},
+      {q:'Le cycle d\'amélioration continue ITIL 4 commence par la question :', opts:['Où en sommes-nous ?','Quelle est la vision ?','Comment y arriver ?','Sommes-nous arrivés ?'], correct:1},
+      {q:'MongoDB est un exemple de base de données :', opts:['SQL relationnelle','NoSQL','Temps réel IoT','Data Warehouse'], correct:1},
+      {q:'ITSM signifie :', opts:['International Technology Systems Management','Information Technology Service Management','Integrated Tools for System Maintenance','IT Strategy and Monitoring'], correct:1},
+      {q:'La chaîne de valeur du service ITIL 4 comprend l\'activité "Obtention / Construction" qui sert à :', opts:['Définir les besoins stratégiques','Interagir avec les parties prenantes','Acquérir ou développer les ressources nécessaires','Identifier et mettre en œuvre des améliorations'], correct:2},
+      {q:'Un ERP/PGI (Progiciel de Gestion Intégré) gère typiquement :', opts:['Uniquement la comptabilité','Uniquement les ressources humaines','L\'ensemble des processus d\'une entreprise (RH, comptabilité, ventes, approvisionnement)','La surveillance des réseaux informatiques'], correct:2},
+      {q:'Le PCA diffère du PRA en ce que le PCA vise à :', opts:['Reprendre l\'activité après un incident','Maintenir l\'activité pendant un incident','Former les employés aux SI','Auditer les systèmes de sécurité'], correct:1},
+      {q:'Dans ITIL 4, un résultat d\'une réduction de 30% du MTTR après déploiement d\'un workflow automatisé illustre :', opts:['Le principe "Optimiser & automatiser"','L\'amélioration continue par pratique de gestion des incidents','La dimension "Organisation & Personnes"','Le rôle sécuritaire des SI'], correct:1}
+    ]
+  }
+};
+
+// ============================================================
+// EXAM ENGINE
+// ============================================================
+let currentExam = null;
+let currentQIndex = 0;
+let examAnswers = {};
+let timerInterval = null;
+let timeLeft = 0;
+
+function startExam(examId) {
+  currentExam = examData[examId];
+  currentQIndex = 0;
+  examAnswers = {};
+  timeLeft = currentExam.time;
+  document.getElementById('exam-select-screen').style.display = 'none';
+  document.getElementById('exam-running').style.display = 'block';
+  document.getElementById('exam-results').style.display = 'none';
+  document.getElementById('exam-title').textContent = currentExam.title;
+  document.getElementById('exam-subtitle').textContent = currentExam.subtitle;
+  buildExamQuestions();
+  showExamQ(0);
+  startTimer();
+}
+
+function buildExamQuestions() {
+  const container = document.getElementById('exam-questions-container');
+  container.innerHTML = '';
+  currentExam.questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'exam-q' + (i===0?' active':'');
+    div.id = 'exam-q-'+i;
+    div.innerHTML = `
+      <div class="exam-q-num">Question ${i+1} / ${currentExam.questions.length}</div>
+      <div class="exam-q-text">${q.q}</div>
+      <div class="options">
+        ${q.opts.map((o,j)=>`<div class="option" onclick="examAnswer(${i},${j},this)"><span class="opt-letter">${['A','B','C','D'][j]}</span>${o}</div>`).join('')}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function showExamQ(idx) {
+  document.querySelectorAll('.exam-q').forEach(q => q.classList.remove('active'));
+  document.getElementById('exam-q-'+idx).classList.add('active');
+  currentQIndex = idx;
+  const total = currentExam.questions.length;
+  document.getElementById('exam-q-label').textContent = `Question ${idx+1} / ${total}`;
+  document.getElementById('exam-bar-fill').style.width = ((idx+1)/total*100)+'%';
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').textContent = idx === total-1 ? 'Terminer ✓' : 'Suivant →';
+  updateDotsDisplay();
+}
+
+function examNav(dir) {
+  const total = currentExam.questions.length;
+  const next = currentQIndex + dir;
+  if(next >= total) { submitExam(); return; }
+  if(next < 0) return;
+  showExamQ(next);
+}
+
+function examAnswer(qIdx, optIdx, el) {
+  const container = document.getElementById('exam-q-'+qIdx);
+  container.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  examAnswers[qIdx] = optIdx;
+  updateDotsDisplay();
+  updateLiveScore();
+}
+
+function updateDotsDisplay() {
+  const total = currentExam.questions.length;
+  let html = '';
+  for(let i=0;i<total;i++) {
+    const answered = examAnswers[i] !== undefined;
+    const current = i === currentQIndex;
+    const color = current ? 'var(--accent)' : answered ? 'var(--green)' : 'var(--bg4)';
+    html += `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin:0 2px;cursor:pointer" onclick="showExamQ(${i})"></span>`;
+  }
+  document.getElementById('exam-dots').innerHTML = html;
+}
+
+function updateLiveScore() {
+  const answered = Object.keys(examAnswers).length;
+  document.getElementById('exam-score-live').textContent = answered + ' répondu(es)';
+}
+
+function startTimer() {
+  if(timerInterval) clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft <= 0) { clearInterval(timerInterval); submitExam(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s = (timeLeft%60).toString().padStart(2,'0');
+  const disp = document.getElementById('timer-display');
+  if(disp) {
+    disp.textContent = m+':'+s;
+    disp.style.color = timeLeft < 60 ? 'var(--red)' : 'var(--text)';
+  }
+}
+
+function submitExam() {
+  clearInterval(timerInterval);
+  document.getElementById('exam-running').style.display = 'none';
+  document.getElementById('exam-results').style.display = 'block';
+  let correct = 0, wrong = 0, skipped = 0;
+  const reviewHTML = [];
+  currentExam.questions.forEach((q, i) => {
+    const answered = examAnswers[i];
+    if(answered === undefined) {
+      skipped++;
+      reviewHTML.push(`<div class="ar-item ko"><span class="ar-icon">⊘</span><div class="ar-text"><strong>${q.q}</strong><span class="ar-given">Non répondue</span><span class="ar-correct">Bonne réponse : ${['A','B','C','D'][q.correct]}. ${q.opts[q.correct]}</span></div></div>`);
+    } else if(answered === q.correct) {
+      correct++;
+      reviewHTML.push(`<div class="ar-item ok"><span class="ar-icon">✓</span><div class="ar-text"><strong>${q.q}</strong><span class="ar-correct">Bonne réponse : ${q.opts[q.correct]}</span></div></div>`);
+    } else {
+      wrong++;
+      reviewHTML.push(`<div class="ar-item ko"><span class="ar-icon">✗</span><div class="ar-text"><strong>${q.q}</strong><span class="ar-given">Ta réponse : ${q.opts[answered]}</span><span class="ar-correct">Bonne réponse : ${q.opts[q.correct]}</span></div></div>`);
+    }
+  });
+  const total = currentExam.questions.length;
+  const pct = Math.round(correct/total*100);
+  const circle = document.getElementById('result-circle');
+  circle.className = 'score-circle';
+  let grade, msg;
+  if(pct >= 90) { circle.classList.add('excellent'); grade='Excellent'; msg='Félicitations ! Tu maîtrises ce chapitre. Continue comme ça !'; }
+  else if(pct >= 70) { circle.classList.add('good'); grade='Bien'; msg='Bonne performance ! Revois les questions manquées.'; }
+  else if(pct >= 50) { circle.classList.add('average'); grade='Passable'; msg='Il faut encore réviser. Relis le cours et réessaie.'; }
+  else { circle.classList.add('poor'); grade='Insuffisant'; msg='Reprends le cours depuis le début, puis retente l\'examen.'; }
+  document.getElementById('result-pct').textContent = pct+'%';
+  document.getElementById('result-grade').textContent = grade;
+  document.getElementById('result-title').textContent = currentExam.title + ' — Résultats';
+  document.getElementById('result-msg').textContent = msg;
+  document.getElementById('result-correct').textContent = correct;
+  document.getElementById('result-wrong').textContent = wrong;
+  document.getElementById('result-skipped').textContent = skipped;
+  document.getElementById('answer-review-list').innerHTML = reviewHTML.join('');
+}
+
+function resetExam() {
+  const examId = Object.keys(examData).find(k => examData[k] === currentExam);
+  startExam(examId);
+}
+
+function backToExamList() {
+  document.getElementById('exam-select-screen').style.display = 'block';
+  document.getElementById('exam-running').style.display = 'none';
+  document.getElementById('exam-results').style.display = 'none';
+}
+</script>
+</body>
+</html>
